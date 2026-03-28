@@ -86,17 +86,43 @@ const AddProducts = () => {
 
         {/* Image */}
         <div>
-          <label className="block mb-1 font-medium">صورة المنتج</label>
-          <input type="file" accept="image/*" onChange={handleImageChange} />
+  <label className="block mb-2 font-semibold text-gray-700">
+    صورة المنتج
+  </label>
 
-          {preview && (
-            <img
-              src={preview}
-              alt="preview"
-              className="mt-3 w-full h-40 object-cover rounded-lg"
-            />
-          )}
-        </div>
+  <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-primary hover:bg-gray-50 transition">
+    
+    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+      <svg
+        className="w-8 h-8 mb-2 text-gray-400"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+      >
+        <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+      </svg>
+      <p className="text-sm text-gray-500">
+        اضغط لرفع صورة أو اسحبها هنا
+      </p>
+    </div>
+
+    <input
+      type="file"
+      accept="image/*"
+      onChange={handleImageChange}
+      className="hidden"
+    />
+  </label>
+
+  {preview && (
+    <img
+      src={preview}
+      alt="preview"
+      className="mt-4 w-full h-48 object-cover rounded-xl shadow"
+    />
+  )}
+</div>
 
         {/* Name */}
         <input
