@@ -1,21 +1,131 @@
 const { GoogleGenAI } = require("@google/genai");
 const dotenv = require("dotenv");
+
+const Order = require("../models/orderModel");
+const Product = require("../models/productsModel");
+const Inventory = require("../models/inventoryModel");
+const Material = require("../models/materialModel");
+
 dotenv.config();
 
 const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
-// Google AI Studio
 exports.AI = async (req, res) => {
   try {
+    // =========================
+    // 📦 1. جلب البيانات
+    // =========================
+    const orders = await Order.find();
+    const products = await Product.find();
+    const inventory = await Inventory.find();
+    const materials = await Material.find();
+
+    // =========================
+    // 📊 2. حساب الإحصائيات
+    // =========================
+
+    // Orders
+    const totalOrders = orders.length;
+
+    const totalSales = orders.reduce(
+      (acc, order) => acc + (order.Total || 0),
+      0
+    );
+
+    const totalDiscount = orders.reduce(
+      (acc, order) => acc + ((order.TotalBD || 0) - (order.Total || 0)),
+      0
+    );
+
+    const uniqueCustomers = new Set(
+      orders.map(order => order.clientName)
+    );
+
+    const totalCustomers = uniqueCustomers.size;
+
+    const avgOrderValue =
+      totalOrders > 0 ? (totalSales / totalOrders).toFixed(2) : 0;
+
+    // Products
+    const totalProducts = products.length;
+
+    const totalProductPrices = products.reduce(
+      (acc, p) => acc + (p.price || 0),
+      0
+    );
+
+    const avgProductPrice =
+      totalProducts > 0
+        ? (totalProductPrices / totalProducts).toFixed(2)
+        : 0;
+
+    // Inventory
+    const totalInventoryItems = inventory.length;
+
+    const totalStock = inventory.reduce(
+      (acc, item) => acc + (item.quantity || 0),
+      0
+    );
+
+    // Materials
+    const totalMaterials = materials.length;
+
+    const totalMaterialStock = materials.reduce(
+      (acc, m) => acc + (m.quantity || 0),
+      0
+    );
+
+    // =========================
+    // 🧾 3. تجهيز Summary
+    // =========================
+    const summary = `
+    الطلبات:
+    - عدد الطلبات: ${totalOrders}
+    - مجموع المبيعات: ${totalSales}
+    - متوسط الطلب: ${avgOrderValue}
+    - إجمالي الخصومات: ${totalDiscount}
+    - عدد العملاء: ${totalCustomers}
+
+    المنتجات:
+    - عدد المنتجات: ${totalProducts}
+    - متوسط سعر المنتج: ${avgProductPrice}
+
+    المخزون:
+    - عدد عناصر المخزون: ${totalInventoryItems}
+    - إجمالي الكمية: ${totalStock}
+
+    المواد الخام:
+    - عدد المواد: ${totalMaterials}
+    - إجمالي الكمية: ${totalMaterialStock}
+    `;
+
+    // =========================
+    // 🤖 4. إرسال للـ AI
+    // =========================
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: `محل "كوفي ستار" يضم 10 موظفين ويخدم حوالي 550 عميل نشط، ويقدم مجموعة متنوعة من المنتجات تشمل القهوة، الشاي، العصائر، الحلويات، والساندويشات، مستخدماً مواد خام مثل حبوب القهوة، الشاي، الحليب، السكر، الكريمة، الخبز، والفواكه. خلال الأشهر الثلاثة الأخيرة، شهد المحل أداءً متزايداً في المبيعات والربح. في يناير، بلغت المبيعات حوالي 25,000 دولار مع ربح صافي قدره 7,500 دولار، وخدم 450 عميل وقدم 480 طلباً، حيث تم بيع 1,350 منتجاً واستخدام 200 كجم من المواد الخام، مع مخزون متبقي 1,100 وحدة. في فبراير، ارتفعت المبيعات إلى 28,000 دولار مع ربح صافي 8,400 دولار، وخدم المحل 500 عميل وقدم 520 طلباً، وتم بيع 1,500 منتج واستخدام 220 كجم من المواد الخام، مع مخزون متبقي 950 وحدة. وفي مارس، وصلت المبيعات إلى 32,000 دولار مع ربح صافي 9,600 دولار، وخدم 550 عميل وقدم 600 طلباً، وتم بيع 1,700 منتج واستخدام 250 كجم من المواد الخام، مع مخزون متبقي 900 وحدة. نسبة الربح كانت ثابتة تقريباً عند 30% لكل شهر، ومتوسط الطلبات لكل موظف زاد من 48 طلباً في يناير إلى 60 طلباً في مارس، بينما متوسط المنتجات لكل عميل ظل حوالي 3 منتجات لكل عميل. هذا الأداء يشير إلى توسع قاعدة العملاء وزيادة المبيعات بشكل ثابت، مع إدارة جيدة للمخزون والمواد الخام، وفرص لتحفيز المبيعات عبر العروض المتعددة لكل عميل.
-       بدي تعطيني نصائح اعملها بناءا على هاي المعلومات و بدي اشياء ابعد عنها عشان اضل محافظ على نجاحي و قسمهم على 3 فقرات بدون ترقيم و يكون النص قصير
+      contents: `
+      لديك بيانات كاملة عن كافيه:
+
+      ${summary}
+
+      اعطني تحليل ذكي للأداء.
+      اعطني نصائح لتحسين المبيعات والإدارة.
+      اعطني أشياء يجب تجنبها للحفاظ على النجاح.
+
+      الشروط:
+      - 3 فقرات فقط
+      - بدون ترقيم
+      - كل فقرة قصيرة
+      - بأسلوب عملي وواضح
       `
     });
 
-    console.log(response.text);
-    res.status(200).json({ error: false, text: response.text });
+    res.status(200).json({
+      error: false,
+      text: response.text
+    });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: true });

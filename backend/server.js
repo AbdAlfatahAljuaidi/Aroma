@@ -9,6 +9,7 @@ const inventoryRoute = require("./routes/inventoryRoute")
 const productRoute = require("./routes//productRoute")
 const orderRoute = require("./routes//orderRoute")
 const aiRoute = require("./routes//aiRoute")
+const statisticsRoutes = require("./routes/statisticsRoutes")
 
 require('dotenv').config()
 
@@ -26,6 +27,7 @@ app.use("/",inventoryRoute)
 app.use("/",productRoute)
 app.use("/",orderRoute)
 app.use("/",aiRoute)
+app.use("/api", statisticsRoutes);
 
 const DbConnect = () => {
 
