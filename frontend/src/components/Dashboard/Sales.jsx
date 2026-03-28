@@ -91,7 +91,7 @@ const Sales = () => {
               className="group bg-white p-4 sm:p-6 rounded-3xl border shadow-sm hover:shadow-xl transition cursor-pointer text-center"
             >
               <div className="mb-2 sm:mb-4 flex justify-center text-3xl sm:text-4xl text-primary">
-                <FaCoffee />
+              <img src={product.image} alt="" className='h-36 w-full' />
               </div>
   
               <h3 className="font-bold">{product.name}</h3>

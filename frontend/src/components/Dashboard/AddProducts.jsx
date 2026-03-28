@@ -52,7 +52,7 @@ const AddProducts = () => {
   
       console.log(res.data); // 👈 هون البيانات
   
-      alert("Product added successfully 🔥");
+      alert("Product added successfully");
   
       // reset
       setFormData({
@@ -82,11 +82,11 @@ const AddProducts = () => {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md space-y-4"
       >
-        <h2 className="text-2xl font-bold text-center">Add Product</h2>
+        <h2 className="text-2xl font-bold text-center">اضافة منتج</h2>
 
         {/* Image */}
         <div>
-          <label className="block mb-1 font-medium">Product Image</label>
+          <label className="block mb-1 font-medium">صورة المنتج</label>
           <input type="file" accept="image/*" onChange={handleImageChange} />
 
           {preview && (
@@ -105,7 +105,7 @@ const AddProducts = () => {
           value={formData.name}
           onChange={handleChange}
           className="w-full border p-2 rounded-lg"
-          placeholder="Product Name"
+          placeholder="اسم المنتج"
         />
 
         {/* Price */}
@@ -115,7 +115,7 @@ const AddProducts = () => {
           value={formData.price}
           onChange={handleChange}
           className="w-full border p-2 rounded-lg"
-          placeholder="Price"
+          placeholder="السعر"
         />
 
         {/* Type */}
@@ -125,7 +125,7 @@ const AddProducts = () => {
           value={formData.type}
           onChange={handleChange}
           className="w-full border p-2 rounded-lg"
-          placeholder="Type"
+          placeholder="النوع"
         />
 
         {/* Cost */}
@@ -135,7 +135,7 @@ const AddProducts = () => {
           value={formData.cost}
           onChange={handleChange}
           className="w-full border p-2 rounded-lg"
-          placeholder="Cost"
+          placeholder="التكلفة"
         />
 
         <button
@@ -143,7 +143,7 @@ const AddProducts = () => {
           disabled={loading}
           className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition disabled:bg-gray-400"
         >
-          {loading ? "Uploading..." : "Add Product"}
+          {loading ? "يتم اضافة المنتج..." : "اضافة المنتج"}
         </button>
       </form>
     </div>
