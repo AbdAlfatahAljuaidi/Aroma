@@ -42,8 +42,8 @@ const Sales = () => {
     try {
       const newOrder = {
         orderID: Date.now().toString(),
-        clientName: "Mohammed",
-        employeeName: "Ahmad",
+        clientName: "Ali",
+        employeeName: "Alaa",
         Type: paymentType,
         Discount: discount,
         order: cart.map((item) => ({
