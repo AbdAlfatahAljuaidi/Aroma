@@ -82,14 +82,13 @@ const SideMenu = ({ setPage, page }) => {
         <div className="md:mt-10 mt-5 flex items-center">
           <IoPerson className="bg-gray-200 w-10 h-10 rounded-full px-2 py-2" />
           <div className="text-md">
-            <p className="mr-2">Abd Alfatah Aljuaidi</p>
+            <p className="mr-2">Aroma</p>
           </div>
         </div>
-<Link to="/Login">
+
         <button className="flex items-center justify-center w-full mt-2 border rounded-md hover:scale-105 transition-all duration-300">
           <PiSignOutBold className="ml-2" /> تسجيل الخروج
         </button>
-        </Link>
       </div>
     </>
   );

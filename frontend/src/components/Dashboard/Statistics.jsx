@@ -49,11 +49,11 @@ const Statistics = () => {
         </p>
       </div>
 
-      <div className="md:grid grid-cols-4 px-8 gap-5">
+      <div className="md:grid grid-cols-4 px-8">
 
         {/* مجموع المبيعات */}
         <div className="shadow-md p-4 rounded-xl bg-white">
-          <div className="flex justify-between items-center px-2">
+          <div className="flex justify-between items-center px-2 ">
             <div>
               <h1>مجموع المبيعات</h1>
               <span className="font-bold text-2xl mt-2 block">
@@ -65,7 +65,7 @@ const Statistics = () => {
         </div>
 
         {/*  اجمالي الخصومات */}
-        <div className="shadow-md p-4 rounded-xl bg-white">
+        <div className="shadow-md p-4 rounded-xl bg-white mt-5 md:mt-0">
   <div className="flex justify-between items-center px-2">
     <div>
       <h1>إجمالي الخصومات</h1>
@@ -79,7 +79,7 @@ const Statistics = () => {
 </div>
 
         {/* عدد العملاء */}
-        <div className="shadow-md p-4 rounded-xl bg-white">
+        <div className="shadow-md p-4 rounded-xl bg-white mt-5 md:mt-0">
           <div className="flex justify-between items-center px-2">
             <div>
               <h1>عدد العملاء</h1>
@@ -92,7 +92,7 @@ const Statistics = () => {
         </div>
 
         {/* عدد الطلبات */}
-        <div className="shadow-md p-4 rounded-xl bg-white">
+        <div className="shadow-md p-4 rounded-xl bg-white mt-5 md:mt-0">
           <div className="flex justify-between items-center px-2">
             <div>
               <h1>عدد الطلبات</h1>
