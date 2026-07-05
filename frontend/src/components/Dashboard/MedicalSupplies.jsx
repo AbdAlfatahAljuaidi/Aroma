@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaExclamationTriangle, FaSearch, FaBoxes, FaChevronLeft, FaChevronRight, FaEdit, FaTrashAlt, FaTimes, FaSave } from 'react-icons/fa';
+import { FaPlus, FaExclamationTriangle, FaSearch, FaBoxes, FaChevronLeft, FaChevronRight, FaEdit, FaTrashAlt, FaTimes, FaSave, FaFileExcel, FaFilePdf } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
-
 
 const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
@@ -52,16 +52,15 @@ const MedicalSupplies = () => {
       try {
         const response = await axios.delete(`${API_URL}/supplies/${id}`);
         if (response.data.success) {
-          // تحديث الحالة محلياً للحذف الفوري من الجدول دون إعادة تحميل الصفحة
           setSupplies(prev => prev.filter(item => item.id !== id));
-          toast.success("تم حذف المادة الطبية بنجاح",{
+          toast.success("تم حذف المادة الطبية بنجاح", {
             className: "!text-black !bg-white border border-teal-600",
             progressClassName: "!bg-teal-300",
           });
         }
       } catch (err) {
         console.error("حدث خطأ أثناء الحذف:", err);
-        toast.error(err.response?.data?.message || "فشل في إتمام عملية الحذف.",{
+        toast.error(err.response?.data?.message || "فشل في إتمام عملية الحذف.", {
           className: "!text-red-500 !bg-white border border-red-600",
           progressClassName: "!bg-red-300",
         });
@@ -83,20 +82,19 @@ const MedicalSupplies = () => {
       const response = await axios.put(`${API_URL}/supplies/${editingSupply.id}`, editingSupply);
 
       if (response.data.success) {
-        // تحديث العنصر داخل المصفوفة المحلية بالبيانات المحدثة والحالة المحسوبة الراجعة من السيرفر
         setSupplies(prev =>
           prev.map(item => item.id === editingSupply.id ? response.data.data : item)
         );
         setIsEditModalOpen(false);
         setEditingSupply(null);
-        toast.success("تم تحديث بيانات المستلزم بنجاح",{
+        toast.success("تم تحديث بيانات المستلزم بنجاح", {
           className: "!text-black !bg-white border border-teal-600",
           progressClassName: "!bg-teal-300",
         });
       }
     } catch (err) {
       console.error("حدث خطأ أثناء التحديث:", err);
-      toast.error(err.response?.data?.message || "فشل في تحديث بيانات المادة الطبية.",{
+      toast.error(err.response?.data?.message || "فشل في تحديث بيانات المادة الطبية.", {
         className: "!text-red-500 !bg-white border border-red-600",
         progressClassName: "!bg-red-300",
       });
@@ -125,26 +123,69 @@ const MedicalSupplies = () => {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // تصفير الصفحة عند البحث لضمان عدم حدوث تضارب في الفهرسة
+    setCurrentPage(1);
   };
 
   // 3. اقتطاع صفحة المستلزمات الحالية للعرض
   const startIndex = (currentPage - 1) * limit;
   const currentPaginatedSupplies = filteredSupplies.slice(startIndex, startIndex + limit);
 
+  // دالة تصدير البيانات إلى ملف Excel باللغة العربية (RTL)
+  const exportToExcel = () => {
+    if (filteredSupplies.length === 0) {
+      return toast.info("لا توجد مستلزمات لتصديرها حالياً");
+    }
+
+    const excelData = filteredSupplies.map(item => {
+      const isCritical = item.currentQuantity <= item.minQuantity;
+      return {
+        'المادة الطبية': item.itemName,
+        'التصنيف المخزني': item.category || 'غير مصنف',
+        'الكمية الحالية': item.currentQuantity,
+        'الحد الأدنى الآمن': item.minQuantity,
+        'حالة المخزون': item.status || (isCritical ? 'بحاجة لطلب فوري' : 'متوفر وآمن'),
+        'ملاحظات': item.notes || '-'
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+
+    if (!worksheet['!views']) worksheet['!views'] = [{}];
+    worksheet['!views'][0].RTL = true;
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "مخزون المستلزمات");
+    XLSX.writeFile(workbook, `مخزون_المستلزمات_${new Date().toISOString().split('T')[0]}.xlsx`);
+    toast.success("تم تصدير تقرير المخزون لملف Excel بنجاح");
+  };
+
+
+
   return (
     <div className="bg-slate-50 min-h-screen pb-10 text-right px-4 md:px-0" dir="rtl">
     {/* الهيدر العلوي - متجاوب بالكامل */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 mx-0 md:mx-[32px] my-6 gap-4 rounded-2xl bg-white border border-slate-100 shadow-sm">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 mx-0 md:mx-[32px] my-6 gap-4 rounded-2xl bg-white border border-slate-150 shadow-sm">
       <div>
         <h1 className="text-xl md:text-2xl font-bold text-slate-800">المستلزمات الطبية والمستهلكات</h1>
         <p className="text-slate-400 text-xs md:text-sm mt-1">مراقبة مخزون المواد العلاجية اليومية وحدود الطلب الحرجة</p>
       </div>
-      <Link to="/AddSupplies" className="w-full sm:w-auto">
-        <button className="flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-md shadow-teal-100">
-          <FaPlus size={14} /> إضافة مادة جديدة
+
+      {/* أزرار الإجراءات المضافة حديثاً (التصدير والطباعة بجانب إضافة مادة جديدة) */}
+      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+        <button 
+          onClick={exportToExcel}
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-colors shadow-sm"
+        >
+          <FaFileExcel size={14} />
+          تصدير Excel
         </button>
-      </Link>
+       
+        <Link to="/AddSupplies" className="w-full sm:w-auto">
+          <button className="flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-md shadow-teal-100">
+            <FaPlus size={14} /> إضافة مادة جديدة
+          </button>
+        </Link>
+      </div>
     </div>
   
     {/* أدوات البحث والفلترة السريعة */}
@@ -179,7 +220,6 @@ const MedicalSupplies = () => {
     <div className="px-0 md:px-8 mt-2">
       <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto w-full block scrollbar-thin">
-          {/* تحديد min-w يضمن عدم انضغاط الجدول في الشاشات الصغيرة */}
           <table className="w-full min-w-[950px] text-right border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs md:text-sm">
@@ -297,7 +337,6 @@ const MedicalSupplies = () => {
     {isEditModalOpen && editingSupply && (
       <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex justify-center items-center z-50 p-4 overflow-y-auto">
         <div className="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-lg overflow-hidden my-auto max-h-[calc(100vh-2rem)] flex flex-col animate-in fade-in zoom-in-95 duration-200">
-          {/* رأس المودال */}
           <div className="flex justify-between items-center p-5 border-b border-slate-100 bg-slate-50/50 shrink-0">
             <h2 className="text-base md:text-lg font-bold text-slate-800 flex items-center gap-2">
               <FaEdit className="text-teal-600" /> تعديل المادة والمستلزم الطبي
@@ -310,7 +349,6 @@ const MedicalSupplies = () => {
             </button>
           </div>
   
-          {/* فورم تعديل المستلزم - قابل للتمرير في الشاشات القصيرة جداً */}
           <form onSubmit={handleUpdateSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">اسم المادة الطبية</label>
@@ -369,7 +407,6 @@ const MedicalSupplies = () => {
               />
             </div>
   
-            {/* أزرار التحكم في أسفل المودال */}
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-6 shrink-0">
               <button
                 type="button"

@@ -9,7 +9,6 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css' // تأكد من استيراد الـ CSS الخاص بالـ toast لو مش مستورد بمكان ثاني
 import AddMaterial from './components/Dashboard/AddMaterial'
 import AddInventory from './components/Dashboard/AddInventory'
-import AddProducts from './components/Dashboard/AddProducts'
 import Book from './components/Dashboard/Book'
 import AddService from './components/Dashboard/AddService'
 import AddSupplies from './components/Dashboard/AddSupplies'
@@ -48,7 +47,6 @@ function App() {
         <Route path='/AddMaterial' element={<ProtectedRoute><AddMaterial /></ProtectedRoute>} /> 
         <Route path='/AddMaterial/:materialName' element={<ProtectedRoute><AddMaterial /></ProtectedRoute>} /> 
         <Route path='/addInventory' element={<ProtectedRoute><AddInventory /></ProtectedRoute>} /> 
-        <Route path='/AddProducts' element={<ProtectedRoute><AddProducts /></ProtectedRoute>} /> 
         <Route path='/Book' element={<ProtectedRoute><Book /></ProtectedRoute>} /> 
         <Route path='/AddService' element={<ProtectedRoute><AddService /></ProtectedRoute>} /> 
         <Route path='/AddSupplies' element={<ProtectedRoute><AddSupplies /></ProtectedRoute>} /> 

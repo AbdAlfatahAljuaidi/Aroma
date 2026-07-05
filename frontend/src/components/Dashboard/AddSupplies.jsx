@@ -22,6 +22,10 @@ const AddSupplies = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
+  
+  const employee = JSON.parse(localStorage.getItem("employeeUser"));
+  const employeeName = employee?.name;
+
   // تحديث البيانات عند الكتابة في الحقول
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,7 +55,8 @@ const AddSupplies = () => {
         category: formData.category,
         currentQuantity: Number(formData.currentQuantity),
         minQuantity: Number(formData.minQuantity),
-        notes: formData.notes
+        notes: formData.notes,
+        employeeName
       });
 
       if (response.data.success) {

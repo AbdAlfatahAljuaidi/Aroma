@@ -9,10 +9,15 @@ const apiUrl = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 const AddPatient = () => {
   const navigate = useNavigate();
 
+  
+  const employee = JSON.parse(localStorage.getItem("employeeUser"));
+  const employeeName = employee?.name;
+
   // حالات إدارة المدخلات المتطورة
   const [formData, setFormData] = useState({
     patientName: '',
     age: '',
+    employeeName:employeeName,
     phone: '',
     lastVisit: '',
     medicalAlert: 'لا يوجد تنبيهات طبية هامة',
@@ -95,6 +100,7 @@ const AddPatient = () => {
         lastVisit: formData.lastVisit || new Date().toISOString().split('T')[0],
         medicalAlert: formData.medicalAlert,
         clinicalNotes: formData.clinicalNotes, 
+        employeeName:employeeName,
         requestedService: currentService ? currentService.serviceName : 'مخصصة/أخرى',
         
         financialRecord: {

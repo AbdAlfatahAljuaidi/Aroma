@@ -49,7 +49,7 @@ const Statistics = () => {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-10 text-right font-sans" dir="rtl">
+    <div className="bg-slate-50 min-h-screen pb-10 text-right font-sans w-full" dir="rtl">
       
       {/* الهيدر العلوي */}
       <div className="pt-6 px-4 sm:px-8">

@@ -17,6 +17,10 @@ const Book = () => {
   const [basePrice, setBasePrice] = useState('');
   const [status, setStatus] = useState('قيد المراجعة');
 
+
+  
+  const employee = JSON.parse(localStorage.getItem("employeeUser"));
+  const employeeName = employee?.name;
   // دالة إضافة خدمة جديدة وإرسالها للباك-أند (POST) ثم العودة للخلف
   const handleAddService = async (e) => {
     e.preventDefault();
@@ -28,6 +32,7 @@ const Book = () => {
         serviceName,
         category,
         expectedTime,
+        employeeName,
         basePrice: Number(basePrice),
         status
       };

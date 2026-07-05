@@ -20,7 +20,7 @@ const Dashboard = () => {
       <SideMenu setPage={setPage} page={page} />
       
       {/* منطقة المحتوى الرئيسي */}
-      <div className='p-6 overflow-y-auto h-screen'>
+      <div className=' overflow-y-auto h-screen'>
         
         {page === "Statistics" && <Statistics />}
         {page === "Financials" && <Financials />}

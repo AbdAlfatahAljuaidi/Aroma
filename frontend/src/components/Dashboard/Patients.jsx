@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaSearch, FaUserInjured, FaPhone, FaCalendarAlt, FaFileMedical, FaHistory, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaUserInjured, FaPhone, FaCalendarAlt, FaFileMedical, FaHistory, FaChevronLeft, FaChevronRight, FaFileExcel, FaFilePdf } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
+import { toast } from 'react-toastify';
 
 const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
@@ -57,21 +59,61 @@ const Patients = () => {
   const startIndex = (currentPage - 1) * limit;
   const currentPaginatedPatients = filteredPatients.slice(startIndex, startIndex + limit);
 
+  // دالة تصدير قائمة المرضى لملف Excel
+  const exportToExcel = () => {
+    if (filteredPatients.length === 0) {
+      return toast.info("لا توجد سجلات مرضى لتصديرها");
+    }
+
+    const excelData = filteredPatients.map(p => ({
+      'اسم المريض': p.patientName,
+      'العمر (سنة)': p.age,
+      'رقم الهاتف': p.phone,
+      'تاريخ آخر زيارة': p.lastVisit || 'لا يوجد',
+      'التنبيه الطبي': p.medicalAlert || 'لا يوجد',
+      'الوضع المالي (الديون المتبقية)': p.financialRecord?.remainingDebt ? `${p.financialRecord.remainingDebt} JD` : 'خالص / مسدد'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    
+    // إعداد اتجاه الصفحة من اليمين إلى اليسار (RTL) لدعم العرض العربي المنظم
+    if (!worksheet['!views']) worksheet['!views'] = [{}];
+    worksheet['!views'][0].RTL = true;
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "قائمة المرضى");
+    XLSX.writeFile(workbook, `سجلات_المرضى_${new Date().toISOString().split('T')[0]}.xlsx`);
+    toast.success("تم تصدير سجلات المرضى إلى Excel بنجاح");
+  };
+
+
   return (
     <div className="bg-slate-50 min-h-screen pb-10 text-right font-sans" dir="rtl">
     {/* الهيدر العلوي - متجاوب ومنسق بدون تكرار */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-5 md:p-6 mx-4 md:mx-8 mt-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-5 md:p-6 mx-4 md:mx-8 mt-6 rounded-2xl bg-white border border-slate-150 shadow-sm">
       <div>
         <h1 className="text-xl md:text-2xl font-bold text-slate-800">سجلات المرضى</h1>
         <p className="text-slate-400 text-xs md:text-sm mt-1">
           إدارة الملفات الطبية الرقمية، التاريخ المرضي المرجعي، والأقساط المالية
         </p>
       </div>
-      <Link to="/AddPatient" className="w-full sm:w-auto">
-        <button className="w-full sm:w-auto flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all shadow-md shadow-teal-100 whitespace-nowrap">
-          <FaPlus size={14} /> إضافة مريض جديد
+      
+      {/* قسم الأزرار العلوي (إضافة مريض + أدوات الاستخراج الجديدة) */}
+      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+        <button 
+          onClick={exportToExcel}
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-colors shadow-sm"
+        >
+          <FaFileExcel size={14} />
+          تصدير Excel
         </button>
-      </Link>
+       
+        <Link to="/AddPatient" className="w-full sm:w-auto">
+          <button className="w-full sm:w-auto flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all shadow-md shadow-teal-100 whitespace-nowrap">
+            <FaPlus size={14} /> إضافة مريض جديد
+          </button>
+        </Link>
+      </div>
     </div>
   
     {/* أدوات البحث والإحصاء السريع - متجاوبة */}
@@ -91,7 +133,7 @@ const Patients = () => {
         <div className="w-full sm:w-auto bg-white border border-slate-100 px-4 py-2 rounded-xl shadow-sm flex items-center gap-3 justify-center sm:justify-start">
           <span className="w-2 h-2 rounded-full bg-teal-500"></span>
           <p className="text-sm font-medium text-slate-600">
-            إجمالي المسجلين: <span className="font-bold text-slate-900">{loading ? "..." : patients.length}</span>
+            إجمالي المسجلين: <span className="font-bold text-slate-900">{loading ? "..." : filteredPatients.length}</span>
           </p>
         </div>
       </div>
@@ -107,7 +149,6 @@ const Patients = () => {
                 <th className="p-4 font-medium">اسم المريض / العمر</th>
                 <th className="p-4 font-medium">رقم الاتصال</th>
                 <th className="p-4 font-medium">تاريخ آخر زيارة</th>
-                <th className="p-4 font-medium">الملف المرجعي والسريري</th>
                 <th className="p-4 font-medium">التنبيه الطبي</th>
                 <th className="p-4 font-medium">الحساب (المتبقي / الديون)</th>
                 <th className="p-4 font-medium text-left">الإجراءات</th>
@@ -167,11 +208,6 @@ const Patients = () => {
                         <FaCalendarAlt size={12} className="text-slate-400" />
                         {patient.lastVisit}
                       </span>
-                    </td>
-  
-                    {/* حقل الملف المرجعي السريري - محمي من التمدد العشوائي */}
-                    <td className="p-4 max-w-[200px] truncate text-slate-500" title={patient.clinicalNotes}>
-                      {patient.clinicalNotes || <span className="text-slate-300">لا يوجد تفاصيل سريرية</span>}
                     </td>
   
                     {/* التنبيهات الطبية */}

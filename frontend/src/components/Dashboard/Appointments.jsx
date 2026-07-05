@@ -25,6 +25,11 @@ const Appointments = () => {
     return localToday.toISOString().split('T')[0];
   };
 
+  
+  const employee = JSON.parse(localStorage.getItem("employeeUser"));
+  const employeeName = employee?.name;
+
+
   const [filterDate, setFilterDate] = useState(getTodayDateString());
 
   // ---- حالات نظام تصفح الصفحات (Pagination States) ----
@@ -202,7 +207,7 @@ const Appointments = () => {
    
     
     e.preventDefault();
-    if (!newPatient || !newTime || !newService || !appointmentDate) return;
+    if (!newPatient || !newTime || !newService || !appointmentDate || !employeeName) return;
     
     const appointmentData = {
       patientName: newPatient,
@@ -211,7 +216,8 @@ const Appointments = () => {
       service: newService,
       appointmentDay,
       appointmentDate,
-      status: newStatus
+      status: newStatus,
+      employeeName
     };
 
    
@@ -268,9 +274,9 @@ const Appointments = () => {
     <div className="bg-slate-50 min-h-screen pb-10 text-right font-sans" dir="rtl">
   
     {/* الهيدر الإداري */}
-    <div className="pt-6 px-4 sm:px-8">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm gap-4">
-        <div>
+    <div className="pt-6 px-4 sm:px-8 ">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center p-5 sm:p-6 rounded-2xl bg-white border border-slate-150 shadow-sm gap-4">
+        <div className=''>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-800">
             {showBookingForm ? (editingId ? "تعديل تفاصيل الموعد" : "حجز موعد جديد") : "جدول المواعيد والحجوزات"}
           </h1>

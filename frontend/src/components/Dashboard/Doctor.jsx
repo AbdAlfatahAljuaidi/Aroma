@@ -12,6 +12,10 @@ export default function DoctorsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewDoctor, setViewDoctor] = useState(null);
 
+  
+  const employee = JSON.parse(localStorage.getItem("employeeUser"));
+  const employeeName = employee?.name;
+
   // حالة الفورم (للإضافة والتعديل)
   const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState({
@@ -19,7 +23,10 @@ export default function DoctorsPage() {
     specialty: '',
     phone: '',
     email: '',
+    employeeName: employeeName || '',
   });
+
+  
 
   // 1. جلب بيانات الأطباء عند تحميل الصفحة
   const fetchDoctors = async () => {
@@ -133,7 +140,7 @@ export default function DoctorsPage() {
     <div className="p-4 md:p-6 bg-slate-50 min-h-screen font-sans" dir="rtl">
       
       {/* الهيدر وزر الإضافة متجاوب */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6 bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6 bg-white p-5 md:p-6 rounded-2xl border border-slate-150 shadow-sm">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
             <FaUserMd className="text-teal-600 shrink-0" /> إدارة الطاقم الطبي

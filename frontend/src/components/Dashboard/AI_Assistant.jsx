@@ -112,15 +112,15 @@ const AIAssistant = () => {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen flex flex-col text-right font-sans" dir="rtl">
+    <div className="bg-slate-50 min-h-screen flex flex-col text-right font-sans p-6" dir="rtl">
       {/* الهيدر العلوي الذكي - متجاوب تماماً */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center p-4 md:p-6 bg-white border-b border-slate-200 shadow-sm gap-4 shrink-0">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center p-4 md:p-6 bg-white border border-slate-150 rounded-2xl shadow-sm gap-4 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-tr from-teal-500 to-cyan-500 text-white rounded-xl flex items-center justify-center shadow-md shadow-teal-100 shrink-0">
             <IoSparklesOutline className={isTyping ? "animate-spin" : "animate-pulse"} size={18} />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-slate-800">المساعد السريري الذكي (AI)</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-800">المساعد الذكي (AI)</h1>
             <p className="text-slate-400 text-xs md:text-sm mt-0.5">تحليل ملفات المرضى وصياغة التنبيهات الفورية</p>
           </div>
         </div>

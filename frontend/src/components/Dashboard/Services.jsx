@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaSearch, FaStethoscope, FaClock, FaMoneyBillWave, FaEdit, FaTrashAlt, FaChevronLeft, FaChevronRight, FaTimes, FaSave } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaStethoscope, FaClock, FaMoneyBillWave, FaEdit, FaTrashAlt, FaChevronLeft, FaChevronRight, FaTimes, FaSave, FaFileExcel, FaFilePdf } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
 
 const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
@@ -50,17 +51,15 @@ const Services = () => {
       try {
         const response = await axios.delete(`${API_URL}/services/${id}`);
         if (response.data.success) {
-          // تحديث الحالة محلياً لحذف العنصر فوراً من الجدول
           setAllServices(prev => prev.filter(service => service.id !== id));
-          toast.sucess("تم حذف الخدمة بنجاح",{
+          toast.success("تم حذف الخدمة بنجاح", {
             className: "!text-black !bg-white border border-teal-600",
             progressClassName: "!bg-teal-300",
           });
-       
         }
       } catch (err) {
         console.error("حدث خطأ أثناء الحذف:", err);
-        toast.error(err.response?.data?.message || "فشل في إتمام عملية الحذف.",{
+        toast.error(err.response?.data?.message || "فشل في إتمام عملية الحذف.", {
           className: "!text-red !bg-white border border-red-600",
           progressClassName: "!bg-red-300",
         });
@@ -82,20 +81,19 @@ const Services = () => {
       const response = await axios.put(`${API_URL}/services/${editingService.id}`, editingService);
       
       if (response.data.success) {
-        // تحديث العنصر داخل المصفوفة المحلية بالبيانات الجديدة الراجعة من السيرفر
         setAllServices(prev => 
           prev.map(service => service.id === editingService.id ? response.data.data : service)
         );
         setIsEditModalOpen(false);
         setEditingService(null);
-        toast.success("تم تحديث بيانات الخدمة بنجاح",{
+        toast.success("تم تحديث بيانات الخدمة بنجاح", {
           className: "!text-black !bg-white border border-teal-600",
           progressClassName: "!bg-teal-300",
         });
       }
     } catch (err) {
       console.error("حدث خطأ أثناء التحديث:", err);
-      toast,error(err.response?.data?.message || "فشل في تحديث بيانات الخدمة.",{
+      toast.error(err.response?.data?.message || "فشل في تحديث بيانات الخدمة.", {
         className: "!text-red !bg-white border border-red-600",
         progressClassName: "!bg-red-300",
       });
@@ -127,19 +125,59 @@ const Services = () => {
   const startIndex = (currentPage - 1) * limit;
   const currentPaginatedServices = filteredServices.slice(startIndex, startIndex + limit);
 
+  // دالة تصدير الخدمات لملف Excel
+  const exportToExcel = () => {
+    if (filteredServices.length === 0) {
+      return toast.info("لا توجد خدمات لتصديرها");
+    }
+
+    const excelData = filteredServices.map(s => ({
+      'الإجراء / الخدمة الطبية': s.serviceName,
+      'التصنيف العلاجي': s.category || 'غير مصنف',
+      'الوقت المتوقع': s.expectedTime,
+      'السعر الأساسي': `${s.basePrice} JOD`,
+      'حالة الخدمة': s.status === 'نشط' || s.status === 'active' ? 'متاحة للطلب' : s.status
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    
+    // دعم اتجاه اليمين لليسار (RTL) للغة العربية في المخرجات
+    if (!worksheet['!views']) worksheet['!views'] = [{}];
+    worksheet['!views'][0].RTL = true;
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "الخدمات الطبية");
+    XLSX.writeFile(workbook, `دليل_الخدمات_${new Date().toISOString().split('T')[0]}.xlsx`);
+    toast.success("تم تصدير دليل الخدمات الطبية إلى Excel بنجاح");
+  };
+
+
+
   return (
     <div className="bg-slate-50 min-h-screen pb-10 text-right px-4 md:px-0" dir="rtl">
     {/* الهيدر العلوي - متجاوب بالكامل */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 mx-0 md:mx-[32px] my-6 gap-4 rounded-2xl bg-white border border-slate-100 shadow-sm">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 mx-0 md:mx-[32px] my-6 gap-4 rounded-2xl bg-white border border-slate-150 shadow-sm">
       <div>
         <h1 className="text-xl md:text-2xl font-bold text-slate-800">الخدمات والإجراءات العلاجية</h1>
         <p className="text-slate-400 text-xs md:text-sm mt-1">تحديد أسعار المعالجات، المدد الزمنية المتوقعة، والتصنيفات الطبية لخدمات العيادة</p>
       </div>
-      <Link to="/AddService" className="w-full sm:w-auto">
-        <button className="flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-md shadow-teal-100">
-          <FaPlus size={14} /> إضافة خدمة جديدة
+      
+      {/* أدوات التحكم (أزرار الاستخراج المضافة حديثاً بجانب زر الإضافة الأساسي) */}
+      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+        <button 
+          onClick={exportToExcel}
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-colors shadow-sm"
+        >
+          <FaFileExcel size={14} />
+          تصدير Excel
         </button>
-      </Link>
+       
+        <Link to="/AddService" className="w-full sm:w-auto">
+          <button className="flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-md shadow-teal-100">
+            <FaPlus size={14} /> إضافة خدمة جديدة
+          </button>
+        </Link>
+      </div>
     </div>
   
     {/* أدوات البحث والفلترة السريعة */}
@@ -167,7 +205,6 @@ const Services = () => {
     <div className="px-0 md:px-8 mt-2">
       <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto w-full block scrollbar-thin">
-          {/* تم إضافة min-w لضمان عدم انضغاط الأعمدة في الشاشات الصغيرة */}
           <table className="w-full min-w-[800px] text-right border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs md:text-sm">
@@ -281,11 +318,10 @@ const Services = () => {
       </div>
     </div>
   
-    {/* Modal التعديل المنبثق - متجاوب للشاشات الصغيرة جداً والطويلة */}
+    {/* Modal التعديل المنبثق */}
     {isEditModalOpen && editingService && (
       <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex justify-center items-center z-50 p-4 overflow-y-auto">
         <div className="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-lg overflow-hidden my-auto max-h-[calc(100vh-2rem)] flex flex-col animate-in fade-in zoom-in-95 duration-200">
-          {/* رأس المودال */}
           <div className="flex justify-between items-center p-5 border-b border-slate-100 bg-slate-50/50 shrink-0">
             <h2 className="text-base md:text-lg font-bold text-slate-800 flex items-center gap-2">
               <FaEdit className="text-teal-600" /> تعديل بيانات الخدمة الطبية
@@ -298,7 +334,6 @@ const Services = () => {
             </button>
           </div>
   
-          {/* جسم المودال / الفورم - قابل للتمرير داخلياً إذا كانت الشاشة قصيرة */}
           <form onSubmit={handleUpdateSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">اسم الخدمة أو الإجراء الطبي</label>
@@ -358,7 +393,6 @@ const Services = () => {
               </div>
             </div>
   
-            {/* أزرار التحكم أسفل المودال */}
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-6 shrink-0">
               <button
                 type="button"
