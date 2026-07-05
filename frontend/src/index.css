@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@theme {
+    --color-primary: #92400E;
+  }
+
+body{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
