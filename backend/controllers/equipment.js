@@ -1,4 +1,3 @@
-const db = require('../config/firestore');
 
 // اسم المجموعة (Collection) في قاعدة بيانات Firestore
 const EQUIPMENT_COLLECTION = 'medicalEquipment';

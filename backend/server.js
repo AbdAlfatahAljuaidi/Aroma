@@ -20,6 +20,10 @@ const login = require('./routes/login')
 const whatsapp = require('./routes/whatsappMessage')
 
 
+console.log("dsa");
+
+
+
 // 1. تفعيل الـ CORS
 app.use(cors({
     origin: process.env.ORIGIN || 'http://localhost:5173',
